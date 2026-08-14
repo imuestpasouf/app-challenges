@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { listChallenges } from '../../api/challenges';
 import { useAuth } from '../../app/useAuth';
@@ -177,9 +177,14 @@ export function HomeScreen() {
         </button>
       </div>
 
-      <button type="button" onClick={() => void signOut()} className="mx-auto mt-8 block font-mono text-xs text-muted-2 underline">
-        Se déconnecter
-      </button>
+      <div className="mx-auto mt-8 flex justify-center gap-4">
+        <Link to="/settings" className="font-mono text-xs text-muted-2 underline">
+          Réglages
+        </Link>
+        <button type="button" onClick={() => void signOut()} className="font-mono text-xs text-muted-2 underline">
+          Se déconnecter
+        </button>
+      </div>
 
       <p className="mt-3 text-center font-mono text-[10px] text-muted-2">
         v{__APP_VERSION__} ·{' '}

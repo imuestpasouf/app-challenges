@@ -6,6 +6,7 @@ import {
   listMessages,
   listReactions,
   markRead,
+  notifyNewMessage,
   sendMessage,
   setReaction,
   subscribeToChat,
@@ -54,9 +55,14 @@ export function useChatData() {
     }
   }, [messages, myId, queryClient]);
 
+  const partner = partnerQuery.data ?? null;
+
   const sendTextMutation = useMutation({
     mutationFn: (content: string) => sendMessage({ content, imagePath: null }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-messages'] }),
+    onSuccess: (_message, content) => {
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+      if (partner) void notifyNewMessage(partner.id, content);
+    },
   });
 
   const sendPhotoMutation = useMutation({
@@ -64,7 +70,10 @@ export function useChatData() {
       const path = await uploadPhoto(file);
       return sendMessage({ content: null, imagePath: path });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-messages'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+      if (partner) void notifyNewMessage(partner.id, '📷 Photo');
+    },
   });
 
   const reactMutation = useMutation({
@@ -74,7 +83,7 @@ export function useChatData() {
 
   return {
     myId,
-    partner: partnerQuery.data ?? null,
+    partner,
     partnerOnline,
     messages,
     reactions: reactionsQuery.data ?? [],

@@ -70,6 +70,16 @@ export async function sendMessage(input: { content: string | null; imagePath: st
   return toMessage(data as ChatMessageRow);
 }
 
+export async function notifyNewMessage(toUserId: string, preview: string): Promise<void> {
+  try {
+    await supabase.functions.invoke('send-push', {
+      body: { toUserId, kind: 'chat', title: 'Nouveau message', body: preview, url: '/chat' },
+    });
+  } catch {
+    // best-effort : l'envoi du message ne doit jamais échouer à cause du push
+  }
+}
+
 export async function markRead(): Promise<void> {
   const myId = await currentUserId();
   const { error } = await supabase
