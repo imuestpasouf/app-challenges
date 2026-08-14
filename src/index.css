@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Statut calorique (héros de l'app) */
+  --color-green: #12B76A;
+  --color-green-bg: #E7F8F0;
+  --color-amber: #F59E0B;
+  --color-amber-bg: #FEF3DA;
+  --color-red: #F0433A;
+  --color-red-bg: #FDE6E4;
+  --color-black: #1A1D2B;
+  --color-black-bg: #E7E3F0;
+
+  /* Marque / accents */
+  --color-brand: #5B6CFF;
+  --color-brand-2: #8B5CF6;
+  --color-brand-bg: #EAECFF;
+
+  /* Neutres */
+  --color-bg: #F4F6FB;
+  --color-card: #FFFFFF;
+  --color-line: #E6EAF2;
+  --color-line-2: #EDF0F7;
+  --color-ink: #141A2A;
+  --color-muted: #6B7488;
+  --color-muted-2: #9AA2B4;
+  --color-empty: #EAEEF6;
+
+  /* Typographie */
+  --font-heading: "Archivo", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+
+  /* Radii */
+  --radius-card: 24px;
+  --radius-tile: 15px;
+  --radius-cell: 8px;
+
+  /* Ombres */
+  --shadow-sm: 0 6px 16px -8px rgba(41,54,104,.22);
+  --shadow-card: 0 14px 34px -14px rgba(41,54,104,.28);
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
