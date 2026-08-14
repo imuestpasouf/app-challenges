@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../api/supabase';
-import { getPartnerProfile } from '../../api/profile';
+import { getMyProfileName, getPartnerProfile } from '../../api/profile';
 import {
   listMessages,
   listReactions,
@@ -20,6 +20,7 @@ export function useChatData() {
   const queryClient = useQueryClient();
 
   const partnerQuery = useQuery({ queryKey: ['chat-partner'], queryFn: getPartnerProfile });
+  const myProfileQuery = useQuery({ queryKey: ['profile'], queryFn: getMyProfileName });
   const messagesQuery = useQuery({ queryKey: ['chat-messages'], queryFn: listMessages });
   const reactionsQuery = useQuery({ queryKey: ['chat-reactions'], queryFn: listReactions });
 
@@ -56,12 +57,13 @@ export function useChatData() {
   }, [messages, myId, queryClient]);
 
   const partner = partnerQuery.data ?? null;
+  const myName = myProfileQuery.data ?? 'Nouveau message';
 
   const sendTextMutation = useMutation({
     mutationFn: (content: string) => sendMessage({ content, imagePath: null }),
     onSuccess: (_message, content) => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-      if (partner) void notifyNewMessage(partner.id, content);
+      if (partner) void notifyNewMessage(partner.id, myName, content);
     },
   });
 
@@ -72,7 +74,7 @@ export function useChatData() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-      if (partner) void notifyNewMessage(partner.id, '📷 Photo');
+      if (partner) void notifyNewMessage(partner.id, myName, '📷 Photo');
     },
   });
 
