@@ -180,6 +180,11 @@ export function HomeScreen() {
       <button type="button" onClick={() => void signOut()} className="mx-auto mt-8 block font-mono text-xs text-muted-2 underline">
         Se déconnecter
       </button>
+
+      <p className="mt-3 text-center font-mono text-[10px] text-muted-2">
+        v{__APP_VERSION__} ·{' '}
+        {new Date(__BUILD_TIME__).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+      </p>
     </div>
   );
 }
