@@ -32,3 +32,12 @@ const SHORT_FORMAT = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: '
 export function formatShortFr(date: Date): string {
   return SHORT_FORMAT.format(date).replace('.', '');
 }
+
+const LONG_DAY_FORMAT = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
+
+export function formatDateSeparator(date: Date): string {
+  const today = new Date();
+  if (toDateKey(date) === toDateKey(today)) return "AUJOURD'HUI";
+  if (toDateKey(date) === toDateKey(addDays(today, -1))) return 'HIER';
+  return LONG_DAY_FORMAT.format(date).toUpperCase();
+}

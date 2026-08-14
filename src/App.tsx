@@ -5,6 +5,7 @@ import { HomeScreen } from './features/home/HomeScreen';
 import { SportScreen } from './features/sport/SportScreen';
 import { HistoryScreen } from './features/history/HistoryScreen';
 import { NewChallengeScreen } from './features/challenges/NewChallengeScreen';
+import { ChatScreen } from './features/chat/ChatScreen';
 import { TabBar } from './components/TabBar';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/sport" element={<SportScreen />} />
           <Route path="/history" element={<HistoryScreen />} />
           <Route path="/challenges/new" element={<NewChallengeScreen />} />
+          <Route path="/chat" element={<ChatScreen />} />
         </Routes>
       </div>
       <TabBar />

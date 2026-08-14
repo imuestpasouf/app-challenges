@@ -91,7 +91,16 @@ export interface Expense {
 export interface ChatMessage {
   id: string;
   senderId: string;
-  content: string;
+  content: string | null;
+  imagePath: string | null;
   createdAt: string;
   readAt: string | null;
+}
+
+export interface MessageReaction {
+  id: string;
+  messageId: string;
+  userId: string;
+  emoji: string;
+  createdAt: string;
 }
