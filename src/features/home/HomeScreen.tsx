@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { listChallenges } from '../../api/challenges';
-import { getMyProfileName } from '../../api/profile';
 import { useAuth } from '../../app/useAuth';
 import { formatEyebrowDate, formatShortFr } from '../../lib/date';
 import { categoryStyle } from '../../lib/category';
@@ -16,9 +15,8 @@ function fmtSigned(n: number) {
 
 export function HomeScreen() {
   const navigate = useNavigate();
-  const { session, signOut } = useAuth();
+  const { signOut } = useAuth();
 
-  const profileQuery = useQuery({ queryKey: ['profile'], queryFn: getMyProfileName });
   const challengesQuery = useQuery({ queryKey: ['challenges'], queryFn: listChallenges });
   const challenges = challengesQuery.data ?? [];
   const activeChallenges = challenges.filter((c) => c.status === 'actif');
@@ -26,7 +24,6 @@ export function HomeScreen() {
   const cardResults = useChallengeCards(activeChallenges);
   const cards = cardResults.map((r) => r.data).filter((d) => !!d);
 
-  const displayName = profileQuery.data ?? session?.user.email?.split('@')[0] ?? '';
   const doneToday = cards.filter((c) => c.todayDone).length;
   const totalActive = activeChallenges.length;
   const ringOffset = totalActive > 0 ? RING_CIRCUMFERENCE * (1 - doneToday / totalActive) : RING_CIRCUMFERENCE;
