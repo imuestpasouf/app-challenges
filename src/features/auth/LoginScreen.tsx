@@ -49,7 +49,7 @@ export function LoginScreen() {
             <p className="rounded-xl bg-red-bg px-3 py-2 text-sm text-red">{error}</p>
           )}
 
-          <Button type="submit" loading={loading} className="mt-2">
+          <Button type="submit" loading={loading} loadingText="Connexion…" className="mt-2">
             Se connecter
           </Button>
         </form>
