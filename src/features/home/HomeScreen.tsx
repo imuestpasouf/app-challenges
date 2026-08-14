@@ -40,7 +40,7 @@ export function HomeScreen() {
       <div className="pb-4">
         <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-brand">{formatEyebrowDate(new Date())}</p>
         <h1 className="mt-0.5 font-heading text-[26px] font-extrabold tracking-tight text-ink">
-          Une nouvelle journée pour dead ça
+          Une autre journée pour dead ça
         </h1>
       </div>
 
