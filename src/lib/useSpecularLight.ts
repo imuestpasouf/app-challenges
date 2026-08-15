@@ -6,8 +6,7 @@ type DeviceOrientationEventWithPermission = typeof DeviceOrientationEvent & {
 
 export function useSpecularLight() {
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const root = document.documentElement;
     function setLight(nx: number, ny: number) {
       const cx = Math.max(-1, Math.min(1, nx));
@@ -60,26 +59,28 @@ export function useSpecularLight() {
       }
     }
 
-    let idleFrame: number;
-    let idleStart: number | null = null;
-    function idleDrift(timestamp: number) {
-      if (idleStart === null) idleStart = timestamp;
-      const t = (timestamp - idleStart) / 1000;
-      setLight(Math.sin(t * 0.25) * 0.35, Math.cos(t * 0.2) * 0.35);
-      idleFrame = requestAnimationFrame(idleDrift);
-    }
-    idleFrame = requestAnimationFrame(idleDrift);
-
-    function stopIdleOnInteraction() {
-      cancelAnimationFrame(idleFrame);
+    let idleFrame: number | undefined;
+    const stopIdleOnInteraction = () => {
+      if (idleFrame !== undefined) cancelAnimationFrame(idleFrame);
       window.removeEventListener('mousemove', stopIdleOnInteraction);
       window.removeEventListener('touchstart', stopIdleOnInteraction);
+    };
+
+    if (!reduceMotion) {
+      let idleStart: number | null = null;
+      const idleDrift = (timestamp: number) => {
+        if (idleStart === null) idleStart = timestamp;
+        const t = (timestamp - idleStart) / 1000;
+        setLight(Math.sin(t * 0.25) * 0.35, Math.cos(t * 0.2) * 0.35);
+        idleFrame = requestAnimationFrame(idleDrift);
+      };
+      idleFrame = requestAnimationFrame(idleDrift);
+      window.addEventListener('mousemove', stopIdleOnInteraction, { once: true });
+      window.addEventListener('touchstart', stopIdleOnInteraction, { once: true });
     }
-    window.addEventListener('mousemove', stopIdleOnInteraction, { once: true });
-    window.addEventListener('touchstart', stopIdleOnInteraction, { once: true });
 
     return () => {
-      cancelAnimationFrame(idleFrame);
+      if (idleFrame !== undefined) cancelAnimationFrame(idleFrame);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchstart', handleTouchMove);
