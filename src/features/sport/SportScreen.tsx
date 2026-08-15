@@ -6,7 +6,7 @@ import { listEntries, upsertEntry } from '../../api/entries';
 import { zone } from '../../domain/calories';
 import { findBurnedField, findEatenField } from '../../lib/fieldMatch';
 import { todayKey } from '../../lib/date';
-import { ZONE_HEX, ZONE_NAME, hexA, shade } from '../../lib/color';
+import { ZONE_HEX, ZONE_NAME, hexA } from '../../lib/color';
 
 const RANGE_MIN = -1800;
 const RANGE_MAX = 900;
@@ -107,21 +107,25 @@ export function SportScreen() {
     <section className="page-enter screen">
       <div className="ltitle">
         <div className="k">Challenge sport · aujourd'hui</div>
-        <h1 style={{ fontSize: 26 }}>Balance du jour</h1>
+        <h1>Balance du jour</h1>
       </div>
 
-      <div
-        className="glass hero"
-        style={{ background: `linear-gradient(140deg, ${hexA(color, 0.62)}, ${hexA(shade(color, -20), 0.5)})` }}
-      >
+      <div className="glass hero" style={{ background: hexA(color, 0.22) }}>
         <div className="lab">
-          Mangé – Brûlé <span className="chip">{z ? ZONE_NAME[z.zone] : ''}</span>
+          Mangé – Brûlé{' '}
+          {z && (
+            <span className="chip" style={{ background: hexA(color, 0.22), color }}>
+              {ZONE_NAME[z.zone]}
+            </span>
+          )}
         </div>
         <div className="net">
           {balance !== null ? fmt(balance) : '–'}
           <span className="unit">kcal</span>
         </div>
-        <div className="verdict">{z ? z.label : 'Renseigne tes calories du jour'}</div>
+        <div className="verdict" style={{ color: z ? color : undefined }}>
+          {z ? z.label : 'Renseigne tes calories du jour'}
+        </div>
       </div>
 
       <div className="split">
@@ -162,8 +166,9 @@ export function SportScreen() {
           padding: '13px',
           fontWeight: 700,
           color: '#fff',
-          background: 'linear-gradient(135deg, var(--brand), var(--brand-2))',
+          background: 'linear-gradient(135deg, #4C5BD4, #8B5CD6)',
           border: 'none',
+          boxShadow: 'var(--rim), 0 8px 18px -6px rgba(76,91,212,.5)',
           marginBottom: 12,
           opacity: !eatField || !burnField || eatInput === '' || burnInput === '' ? 0.6 : 1,
         }}
