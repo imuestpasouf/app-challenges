@@ -20,21 +20,15 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm rounded-3xl bg-card p-8 shadow-card">
-        <p className="font-mono text-xs uppercase tracking-widest text-muted">Challenges & Vie Partagée</p>
-        <h1 className="mt-2 font-heading text-2xl font-extrabold text-ink">Connexion</h1>
+    <div className="page-enter" style={{ position: 'relative', zIndex: 10, display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }}>
+      <div className="glass gcard" style={{ width: '100%', maxWidth: 360 }}>
+        <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--label-2)', fontWeight: 600 }}>
+          Challenges & Vie Partagée
+        </p>
+        <h1 style={{ marginTop: 8, fontSize: 24, fontWeight: 800 }}>Connexion</h1>
 
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-          <Input
-            id="email"
-            label="Email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+        <form onSubmit={handleSubmit} style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Input id="email" label="Email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <Input
             id="password"
             label="Mot de passe"
@@ -46,7 +40,9 @@ export function LoginScreen() {
           />
 
           {error && (
-            <p className="rounded-xl bg-red-bg px-3 py-2 text-sm text-red">{error}</p>
+            <p className="note" style={{ color: 'var(--red)', textAlign: 'left' }}>
+              {error}
+            </p>
           )}
 
           <Button type="submit" loading={loading} loadingText="Connexion…" className="mt-2">

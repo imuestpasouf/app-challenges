@@ -5,11 +5,6 @@ import type { ChatMessage, MessageReaction } from '../../domain/types';
 
 const REACTS = ['😊', '❤️', '😂', '🔥', '💪', '😢'];
 
-function formatTime(iso: string) {
-  const d = new Date(iso);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
 interface MessageBubbleProps {
   message: ChatMessage;
   isMine: boolean;
@@ -36,51 +31,34 @@ export function MessageBubble({ message, isMine, gap, reactions, onReact }: Mess
   );
 
   return (
-    <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} ${gap ? 'mt-3' : 'mt-0.5'}`}>
-      <div
-        onClick={() => setPickerOpen((v) => !v)}
-        className={`relative max-w-[76%] cursor-pointer shadow-sm ${
-          message.imagePath ? 'overflow-hidden p-[5px]' : 'px-3.5 py-2.5'
-        } text-sm leading-relaxed ${
-          isMine
-            ? 'rounded-[20px_20px_7px_20px] bg-gradient-to-br from-brand to-brand-2 text-white'
-            : 'rounded-[20px_20px_20px_7px] border border-line bg-card text-ink'
-        } ${groupedReactions.length > 0 ? 'mb-3' : ''}`}
-      >
+    <div className={`row ${isMine ? 'sent' : 'recv'} ${gap ? 'gap' : ''}`}>
+      <div className={`bubble${message.imagePath ? ' photo' : ''}`} onClick={() => setPickerOpen((v) => !v)}>
         {message.imagePath ? (
           photoQuery.data ? (
-            <img src={photoQuery.data} alt="" className="block h-[150px] w-[210px] rounded-2xl object-cover" />
+            <img src={photoQuery.data} alt="" />
           ) : (
-            <div className="flex h-[150px] w-[210px] items-center justify-center rounded-2xl bg-line-2 text-xs text-muted">
-              Chargement…
+            <div className="ph" style={{ fontSize: 24 }}>
+              …
             </div>
           )
         ) : (
-          message.content
+          <span className="tx">{message.content}</span>
         )}
-        {message.content && message.imagePath && <div className="px-2 pb-0.5 pt-1.5 text-[13px]">{message.content}</div>}
+        {message.content && message.imagePath && <div className="cap">{message.content}</div>}
 
         {groupedReactions.length > 0 && (
-          <div className={`absolute -bottom-3 flex gap-1 ${isMine ? 'right-2.5' : 'left-2.5'}`}>
+          <div className="reactions">
             {groupedReactions.map(([emoji, count]) => (
-              <span
-                key={emoji}
-                className="flex items-center gap-0.5 rounded-full border border-line bg-white px-1.5 py-0.5 text-xs shadow-sm"
-              >
+              <span key={emoji} className="rc">
                 {emoji}
-                {count > 1 && <small className="font-mono text-[9px] font-bold text-muted">{count}</small>}
+                {count > 1 && <small style={{ fontSize: 9, fontWeight: 700, marginLeft: 2 }}>{count}</small>}
               </span>
             ))}
           </div>
         )}
 
         {pickerOpen && (
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className={`absolute -top-12 z-50 flex gap-0.5 rounded-full border border-line bg-white px-1.5 py-1 shadow-card ${
-              isMine ? 'right-0' : 'left-0'
-            }`}
-          >
+          <div className="rpicker" onClick={(e) => e.stopPropagation()}>
             {REACTS.map((emoji) => (
               <button
                 key={emoji}
@@ -89,7 +67,6 @@ export function MessageBubble({ message, isMine, gap, reactions, onReact }: Mess
                   onReact(emoji);
                   setPickerOpen(false);
                 }}
-                className="rounded-full p-1 text-xl transition-transform hover:scale-125"
               >
                 {emoji}
               </button>
@@ -97,7 +74,6 @@ export function MessageBubble({ message, isMine, gap, reactions, onReact }: Mess
           </div>
         )}
       </div>
-      <span className="mt-0.5 px-1.5 font-mono text-[9.5px] text-muted-2">{formatTime(message.createdAt)}</span>
     </div>
   );
 }

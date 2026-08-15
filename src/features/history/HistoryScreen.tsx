@@ -7,7 +7,7 @@ import { zone } from '../../domain/calories';
 import { monthlyAverage, totalAverage, weeklyAverage, type DailyBalance } from '../../domain/stats';
 import { findBurnedField, findEatenField } from '../../lib/fieldMatch';
 import { addDays, toDateKey, todayKey } from '../../lib/date';
-import { ZONE_HEX } from '../../lib/color';
+import { ZONE_HEX, shade } from '../../lib/color';
 
 const WINDOW_DAYS = 40;
 const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
@@ -119,141 +119,132 @@ export function HistoryScreen() {
   const last7 = [...days].slice(-7).reverse();
 
   if (challengeQuery.isLoading) {
-    return <div className="px-4 py-6 text-sm text-muted">Chargement…</div>;
+    return <div className="screen note">Chargement…</div>;
   }
 
   if (!challenge) {
     return (
-      <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-4 px-4 py-10 text-center">
-        <p className="font-heading text-lg font-bold text-ink">Aucun challenge sport</p>
-        <p className="text-sm text-muted">
-          Crée un challenge avec la catégorie <span className="font-mono text-ink">sport</span> pour voir l'historique.
-        </p>
-        <Link to="/challenges/new" className="font-mono text-sm text-brand underline">
-          Créer un challenge
-        </Link>
-      </div>
+      <section className="page-enter screen" style={{ textAlign: 'center' }}>
+        <div className="glass gcard">
+          <p style={{ fontSize: 18, fontWeight: 700 }}>Aucun challenge sport</p>
+          <p className="note" style={{ marginTop: 8 }}>
+            Crée un challenge avec la catégorie <b>sport</b> pour voir l'historique.
+          </p>
+          <Link to="/challenges/new" style={{ color: 'var(--brand)', display: 'inline-block', marginTop: 12, fontWeight: 600 }}>
+            Créer un challenge
+          </Link>
+        </div>
+      </section>
     );
   }
 
+  let cellIndex = 0;
+
   return (
-    <div className="mx-auto w-full max-w-sm px-4 py-6">
-      <div className="pb-4">
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-2">Ton parcours</p>
-        <h1 className="mt-0.5 font-heading text-[28px] font-black leading-none tracking-tight text-ink">
-          Historique <span className="bg-gradient-to-r from-brand to-brand-2 bg-clip-text text-transparent">en couleurs</span>
+    <section className="page-enter screen">
+      <div className="ltitle">
+        <div className="k">Ton parcours</div>
+        <h1>
+          Historique{' '}
+          <span style={{ background: 'linear-gradient(120deg,var(--brand),var(--brand-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
+            en couleurs
+          </span>
         </h1>
-        <p className="mt-2 font-mono text-[11px] text-muted">
-          {daysWithData} jours enregistrés · {deficitDays} en déficit
-        </p>
       </div>
 
-      <div className="mb-4 flex gap-2">
+      <div className="vitals">
         {[
           { label: '7 JOURS', avg: weekly.average, z: weekly.result },
           { label: '30 JOURS', avg: monthly.average, z: monthly.result },
           { label: 'TOTAL', avg: total.average, z: total.result },
         ].map((v) => (
-          <div key={v.label} className="relative flex-1 overflow-hidden rounded-2xl border border-line bg-card p-3 shadow-sm">
-            <div className="font-mono text-[9.5px] font-bold uppercase tracking-wide text-muted-2">{v.label}</div>
-            <div className="mt-1.5 flex items-baseline gap-1.5">
-              {v.z && <span className="h-1.5 w-1.5 rounded-full" style={{ background: ZONE_HEX[v.z.zone] }} />}
-              <span className="font-heading text-xl font-extrabold tabular-nums text-ink">
+          <div key={v.label} className="glass vital">
+            <div className="vlab">{v.label}</div>
+            <div className="vrow">
+              {v.z && <span className="vdot" style={{ background: ZONE_HEX[v.z.zone] }} />}
+              <span className="vval" style={{ color: v.z ? (v.z.zone === 'black' ? 'var(--label)' : shade(ZONE_HEX[v.z.zone], -14)) : 'var(--label)' }}>
                 {v.avg !== null ? fmt(v.avg) : '–'}
               </span>
             </div>
-            <div className="mt-1 text-[9px] font-semibold text-muted-2">kcal/jour</div>
-            {v.z && <div className="absolute bottom-0 left-0 h-[3px] w-full" style={{ background: ZONE_HEX[v.z.zone] }} />}
+            <div className="vunit">kcal/jour</div>
           </div>
         ))}
       </div>
 
-      <div className="mb-3.5 rounded-3xl border border-line bg-card p-4 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <span className="font-heading text-sm font-bold text-ink">Le mois, jour par jour</span>
-          <span className="font-mono text-[10px] text-muted-2">
-            {days[0].date.getDate()}/{days[0].date.getMonth() + 1} → {days[days.length - 1].date.getDate()}/
-            {days[days.length - 1].date.getMonth() + 1}
+      <div className="glass mcard">
+        <div className="mtop">
+          <b>Le mois, jour par jour</b>
+          <span className="rng">
+            {daysWithData} j · {deficitDays} déficit
           </span>
         </div>
-        <div className="flex justify-center gap-1.5">
-          <div className="mr-0.5 flex flex-col gap-1.5">
+        <div className="mosaic">
+          <div className="wdcol">
             {WEEKDAY_LABELS.map((label, i) => (
-              <span key={i} className="flex h-[30px] w-[13px] items-center justify-center font-mono text-[9px] font-bold text-muted-2">
-                {label}
-              </span>
+              <span key={i}>{label}</span>
             ))}
           </div>
           {columns.map((col, ci) => (
-            <div key={ci} className="flex flex-col gap-1.5">
+            <div key={ci} className="mcol">
               {col.map((day, ri) => {
-                if (!day) return <div key={ri} className="h-[30px] w-[30px] rounded-lg bg-empty" />;
+                const delay = `${cellIndex++ * 11}ms`;
+                if (!day) return <div key={ri} className="mcell" style={{ animationDelay: delay }} />;
                 const z = day.balance !== null ? zone(day.balance) : null;
                 return (
                   <div
                     key={ri}
                     title={day.balance !== null ? `${day.wd} ${day.date.getDate()}/${day.date.getMonth() + 1} · ${fmt(day.balance)} kcal` : undefined}
-                    className={`h-[30px] w-[30px] rounded-lg ${day.isToday ? 'outline outline-[2.5px] outline-offset-2 outline-brand' : ''}`}
-                    style={{ background: z ? ZONE_HEX[z.zone] : 'var(--color-empty)' }}
+                    className={`mcell${day.balance !== null ? ' fill' : ''}${day.isToday ? ' today' : ''}`}
+                    style={{ background: z ? ZONE_HEX[z.zone] : undefined, animationDelay: delay }}
                   />
                 );
               })}
             </div>
           ))}
         </div>
-        <div className="mt-4.5 flex flex-wrap justify-center gap-3">
+        <div className="mleg">
           {LEGEND.map(([c, label]) => (
-            <div key={c} className="flex items-center gap-1.5 text-[10px] text-muted">
-              <i className="h-[9px] w-[9px] rounded" style={{ background: ZONE_HEX[c] }} />
+            <div key={c} className="lg">
+              <i style={{ background: ZONE_HEX[c] }} />
               {label}
             </div>
           ))}
         </div>
       </div>
 
-      <div
-        className="mb-4 flex items-center gap-3.5 rounded-2xl p-4 shadow-card"
-        style={{ background: `linear-gradient(120deg, #111726, #1E2740)` }}
-      >
-        <span className="text-2xl leading-none">🔥</span>
-        <div className="flex-1">
-          <b className="block font-heading text-[15px] font-extrabold text-white">Meilleure série verte</b>
-          <span className="font-mono text-[11.5px] text-[#AEB7CC]">{greenDays} jours "excellents" sur la période</span>
+      <div className="insight">
+        <span className="fl">🔥</span>
+        <div className="it">
+          <b>Meilleure série verte</b>
+          <span>{greenDays} jours "excellents" sur la période</span>
         </div>
-        <div className="text-right font-heading text-[28px] font-black leading-none text-white">
+        <div className="big">
           {bestStreak}
-          <small className="mt-0.5 block font-mono text-[9px] font-semibold tracking-wide text-[#AEB7CC]">JOURS</small>
+          <small>JOURS</small>
         </div>
       </div>
 
-      <div className="mb-2 flex items-baseline justify-between px-1">
-        <b className="font-heading text-[15px] font-extrabold text-ink">Détail</b>
-        <span className="text-[11px] text-muted-2">7 derniers jours</span>
+      <div className="grouptitle">
+        <span>DÉTAIL</span>
+        <span>7 derniers jours</span>
       </div>
-      <div className="mb-4 rounded-2xl border border-line bg-card px-4 shadow-sm">
-        {last7.map((day, i) => {
+      <div className="glass glist2">
+        {last7.map((day) => {
           const z = day.balance !== null ? zone(day.balance) : null;
           return (
-            <div
-              key={day.dateKey}
-              className={`flex items-center justify-between py-2.5 text-sm font-medium ${i < last7.length - 1 ? 'border-b border-line-2' : ''}`}
-            >
-              <div className="flex items-center gap-2.5 text-muted">
-                <i className="h-[11px] w-[11px] rounded" style={{ background: z ? ZONE_HEX[z.zone] : 'var(--color-empty)' }} />
+            <div key={day.dateKey} className="r">
+              <div className="lft">
+                <i style={{ background: z ? ZONE_HEX[z.zone] : 'rgba(40,42,60,.09)' }} />
                 {day.wd} {day.date.getDate()}/{day.date.getMonth() + 1}
                 {day.isToday && " · aujourd'hui"}
               </div>
-              <b className="font-heading tabular-nums" style={{ color: z ? ZONE_HEX[z.zone] : 'var(--color-muted-2)' }}>
-                {day.balance !== null ? `${fmt(day.balance)} kcal` : '–'}
-              </b>
+              <b style={{ color: z ? ZONE_HEX[z.zone] : 'var(--label-3)' }}>{day.balance !== null ? `${fmt(day.balance)} kcal` : '–'}</b>
             </div>
           );
         })}
       </div>
 
-      <p className="text-center text-[11px] leading-relaxed text-muted-2">
-        Chaque tuile = la balance d'un jour, colorée selon ta règle. Les moyennes suivent la même logique.
-      </p>
-    </div>
+      <p className="note">Chaque tuile = la balance d'un jour, colorée selon ta règle. Les moyennes suivent la même logique.</p>
+    </section>
   );
 }

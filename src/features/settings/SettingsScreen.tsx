@@ -9,20 +9,12 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undef
 
 function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
-    <label className="flex items-center justify-between gap-3 py-3">
-      <span className="text-sm text-ink">{label}</span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${checked ? 'bg-brand' : 'bg-line-2'}`}
-      >
-        <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${checked ? 'translate-x-[22px]' : 'translate-x-0.5'}`}
-        />
+    <div className="toggle-row">
+      <span style={{ fontSize: 14 }}>{label}</span>
+      <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)} className={`toggle${checked ? ' on' : ''}`}>
+        <span className="knob" />
       </button>
-    </label>
+    </div>
   );
 }
 
@@ -78,44 +70,52 @@ export function SettingsScreen() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-sm px-4 py-6">
-      <p className="font-mono text-xs uppercase tracking-widest text-muted">Réglages</p>
-      <h1 className="mt-1 font-heading text-2xl font-extrabold text-ink">Notifications</h1>
+    <section className="page-enter screen">
+      <div className="ltitle">
+        <div className="k">Réglages</div>
+        <h1 style={{ fontSize: 24 }}>Notifications</h1>
+      </div>
 
-      <div className="mt-5 rounded-3xl border border-line bg-card p-4 shadow-sm">
-        {permission === 'unsupported' && (
-          <p className="text-sm text-muted">Push non supporté sur cet appareil/navigateur.</p>
-        )}
+      <div className="glass gcard">
+        {permission === 'unsupported' && <p className="note" style={{ textAlign: 'left' }}>Push non supporté sur cet appareil/navigateur.</p>}
         {permission === 'denied' && (
-          <p className="text-sm text-red">
+          <p className="note" style={{ textAlign: 'left', color: 'var(--red)' }}>
             Permission refusée au niveau du système. Va dans Réglages iOS → l'app → Notifications pour l'autoriser.
           </p>
         )}
         {(permission === 'default' || permission === 'granted') && (
           <>
-            <p className="text-sm text-muted">
+            <p className="note" style={{ textAlign: 'left' }}>
               {subscribed
                 ? 'Les notifications sont activées sur cet appareil.'
                 : "Active les notifications pour être prévenu des messages, mises à jour partagées et paliers validés."}
             </p>
-            {error && <p className="mt-2 rounded-xl bg-red-bg px-3 py-2 text-sm text-red">{error}</p>}
+            {error && (
+              <p className="note" style={{ textAlign: 'left', color: 'var(--red)', marginTop: 8 }}>
+                {error}
+              </p>
+            )}
             {subscribed ? (
               <button
                 type="button"
                 onClick={() => disableMutation.mutate()}
                 disabled={disableMutation.isPending}
-                className="mt-3 w-full rounded-2xl border border-line bg-bg px-5 py-3.5 font-heading font-bold text-ink transition-opacity disabled:opacity-60"
+                style={{
+                  marginTop: 12,
+                  width: '100%',
+                  borderRadius: 18,
+                  padding: 13,
+                  fontWeight: 700,
+                  border: '0.5px solid rgba(255,255,255,.7)',
+                  background: 'rgba(255,255,255,.4)',
+                  color: 'var(--label)',
+                  opacity: disableMutation.isPending ? 0.6 : 1,
+                }}
               >
                 {disableMutation.isPending ? 'Désactivation…' : 'Désactiver les notifications'}
               </button>
             ) : (
-              <Button
-                type="button"
-                onClick={() => enableMutation.mutate()}
-                loading={enableMutation.isPending}
-                loadingText="Activation…"
-                className="mt-3"
-              >
+              <Button type="button" onClick={() => enableMutation.mutate()} loading={enableMutation.isPending} loadingText="Activation…" className="mt-3">
                 Activer les notifications
               </Button>
             )}
@@ -124,36 +124,25 @@ export function SettingsScreen() {
       </div>
 
       {prefs && (
-        <div className="mt-4 divide-y divide-line-2 rounded-3xl border border-line bg-card px-4 shadow-sm">
+        <div className="glass gcard" style={{ marginTop: 14 }}>
           <Toggle checked={prefs.chat} onChange={(v) => updateMutation.mutate({ chat: v })} label="Nouveaux messages" />
-          <Toggle
-            checked={prefs.sharedUpdates}
-            onChange={(v) => updateMutation.mutate({ sharedUpdates: v })}
-            label="Planning / courses / dépenses"
-          />
-          <Toggle
-            checked={prefs.milestones}
-            onChange={(v) => updateMutation.mutate({ milestones: v })}
-            label="Paliers validés"
-          />
-          <Toggle
-            checked={prefs.dailyReminder}
-            onChange={(v) => updateMutation.mutate({ dailyReminder: v })}
-            label="Rappel de saisie quotidien"
-          />
+          <Toggle checked={prefs.sharedUpdates} onChange={(v) => updateMutation.mutate({ sharedUpdates: v })} label="Planning / courses / dépenses" />
+          <Toggle checked={prefs.milestones} onChange={(v) => updateMutation.mutate({ milestones: v })} label="Paliers validés" />
+          <Toggle checked={prefs.dailyReminder} onChange={(v) => updateMutation.mutate({ dailyReminder: v })} label="Rappel de saisie quotidien" />
           {prefs.dailyReminder && (
-            <label className="flex items-center justify-between gap-3 py-3">
-              <span className="text-sm text-ink">Heure du rappel</span>
+            <div className="toggle-row">
+              <span style={{ fontSize: 14 }}>Heure du rappel</span>
               <input
                 type="time"
                 value={prefs.reminderTime}
                 onChange={(e) => updateMutation.mutate({ reminderTime: e.target.value })}
-                className="rounded-lg border border-line bg-bg px-2 py-1 text-sm text-ink outline-none focus:border-brand"
+                className="plain-input"
+                style={{ width: 100 }}
               />
-            </label>
+            </div>
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 }

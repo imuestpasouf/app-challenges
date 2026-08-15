@@ -78,90 +78,94 @@ export function NewChallengeScreen() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-sm px-4 py-6">
-      <p className="font-mono text-xs uppercase tracking-widest text-muted">Nouveau challenge</p>
-      <h1 className="mt-1 font-heading text-2xl font-extrabold text-ink">Créer un challenge</h1>
+    <section className="page-enter screen">
+      <div className="ltitle">
+        <div className="k">Nouveau challenge</div>
+        <h1 style={{ fontSize: 24 }}>Créer un challenge</h1>
+      </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-        <Input id="title" label="Titre" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Perte de poids" required />
-        <Input
-          id="category"
-          label="Catégorie"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="sport"
-          required
-        />
-        <p className="-mt-2 text-xs text-muted-2">
-          Utilise <span className="font-mono text-ink">sport</span> pour que l'écran Sport (balance calorique) affiche ce challenge.
-        </p>
+      <div className="glass gcard">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Input id="title" label="Titre" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Perte de poids" required />
+          <Input id="category" label="Catégorie" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="sport" required />
+          <p className="note" style={{ marginTop: -8, textAlign: 'left' }}>
+            Utilise <b>sport</b> pour que l'écran Sport (balance calorique) affiche ce challenge.
+          </p>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Input id="startDate" label="Début" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
-          <Input id="endDate" label="Fin" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
-        </div>
-
-        <div className="mt-2">
-          <div className="flex items-baseline justify-between">
-            <span className="font-heading text-sm font-bold text-ink">Champs de saisie</span>
-            <button
-              type="button"
-              onClick={() => setFields((prev) => [...prev, emptyField()])}
-              className="font-mono text-xs text-brand underline"
-            >
-              + ajouter un champ
-            </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <Input id="startDate" label="Début" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+            <Input id="endDate" label="Fin" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
           </div>
 
-          <div className="mt-3 flex flex-col gap-3">
-            {fields.map((field, i) => (
-              <div key={i} className="rounded-2xl border border-line bg-card p-3 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <input
-                    value={field.label}
-                    onChange={(e) => updateField(i, { label: e.target.value })}
-                    placeholder="Label (ex: Calories ingérées)"
-                    className="flex-1 rounded-xl border border-line bg-bg px-3 py-2 text-sm text-ink outline-none focus:border-brand"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeField(i)}
-                    className="font-mono text-xs text-red"
-                    aria-label="Supprimer le champ"
-                  >
-                    ✕
-                  </button>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>Champs de saisie</span>
+              <button
+                type="button"
+                onClick={() => setFields((prev) => [...prev, emptyField()])}
+                style={{ background: 'none', border: 'none', color: 'var(--brand)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+              >
+                + ajouter un champ
+              </button>
+            </div>
+
+            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {fields.map((field, i) => (
+                <div key={i} className="field-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <input
+                      value={field.label}
+                      onChange={(e) => updateField(i, { label: e.target.value })}
+                      placeholder="Label (ex: Calories ingérées)"
+                      className="plain-input"
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeField(i)}
+                      aria-label="Supprimer le champ"
+                      style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 12, cursor: 'pointer' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                    <input
+                      value={field.unit}
+                      onChange={(e) => updateField(i, { unit: e.target.value })}
+                      placeholder="Unité (ex: kcal)"
+                      className="plain-input"
+                      style={{ flex: 1, fontSize: 12 }}
+                    />
+                    <select
+                      value={field.fieldType}
+                      onChange={(e) => updateField(i, { fieldType: e.target.value as FieldType })}
+                      className="plain-input"
+                      style={{ width: 110, fontSize: 12 }}
+                    >
+                      {Object.entries(FIELD_TYPE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="mt-2 flex gap-2">
-                  <input
-                    value={field.unit}
-                    onChange={(e) => updateField(i, { unit: e.target.value })}
-                    placeholder="Unité (ex: kcal)"
-                    className="flex-1 rounded-xl border border-line bg-bg px-3 py-2 text-xs text-ink outline-none focus:border-brand"
-                  />
-                  <select
-                    value={field.fieldType}
-                    onChange={(e) => updateField(i, { fieldType: e.target.value as FieldType })}
-                    className="rounded-xl border border-line bg-bg px-2 py-2 text-xs text-ink outline-none focus:border-brand"
-                  >
-                    {Object.entries(FIELD_TYPE_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {error && <p className="rounded-xl bg-red-bg px-3 py-2 text-sm text-red">{error}</p>}
+          {error && (
+            <p className="note" style={{ color: 'var(--red)', textAlign: 'left' }}>
+              {error}
+            </p>
+          )}
 
-        <Button type="submit" loading={mutation.isPending} className="mt-2">
-          {mutation.isPending ? 'Création…' : 'Créer le challenge'}
-        </Button>
-      </form>
-    </div>
+          <Button type="submit" loading={mutation.isPending} className="mt-2">
+            {mutation.isPending ? 'Création…' : 'Créer le challenge'}
+          </Button>
+        </form>
+      </div>
+    </section>
   );
 }

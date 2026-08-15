@@ -8,30 +8,42 @@ import { NewChallengeScreen } from './features/challenges/NewChallengeScreen';
 import { ChatScreen } from './features/chat/ChatScreen';
 import { SettingsScreen } from './features/settings/SettingsScreen';
 import { TabBar } from './components/TabBar';
+import { Wallpaper } from './components/Wallpaper';
+import { useSpecularLight } from './lib/useSpecularLight';
 
 function App() {
   const { session, loading } = useAuth();
+  useSpecularLight();
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-bg text-muted">Chargement…</div>;
+    return (
+      <div className="app-shell" style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: 'var(--label-2)' }}>
+        <Wallpaper />
+        Chargement…
+      </div>
+    );
   }
 
   if (!session) {
-    return <LoginScreen />;
+    return (
+      <div className="app-shell">
+        <Wallpaper />
+        <LoginScreen />
+      </div>
+    );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg">
-      <div className="flex-1 pb-6">
-        <Routes>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/sport" element={<SportScreen />} />
-          <Route path="/history" element={<HistoryScreen />} />
-          <Route path="/challenges/new" element={<NewChallengeScreen />} />
-          <Route path="/chat" element={<ChatScreen />} />
-          <Route path="/settings" element={<SettingsScreen />} />
-        </Routes>
-      </div>
+    <div className="app-shell">
+      <Wallpaper />
+      <Routes>
+        <Route path="/" element={<HomeScreen />} />
+        <Route path="/sport" element={<SportScreen />} />
+        <Route path="/history" element={<HistoryScreen />} />
+        <Route path="/challenges/new" element={<NewChallengeScreen />} />
+        <Route path="/chat" element={<ChatScreen />} />
+        <Route path="/settings" element={<SettingsScreen />} />
+      </Routes>
       <TabBar />
     </div>
   );
