@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../api/supabase';
 import { getMyProfileName, getPartnerProfile } from '../../api/profile';
@@ -10,6 +10,7 @@ import {
   sendMessage,
   setReaction,
   subscribeToChat,
+  subscribeToTyping,
   uploadPhoto,
 } from '../../api/chat';
 import { useAuth } from '../../app/useAuth';
@@ -47,7 +48,40 @@ export function useChatData() {
     };
   }, [myId]);
 
+  const [partnerTyping, setPartnerTyping] = useState(false);
+  const notifyTypingRef = useRef<() => void>(() => {});
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!myId) return;
+    const { notifyTyping, unsubscribe } = subscribeToTyping(() => {
+      setPartnerTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => setPartnerTyping(false), 2500);
+    });
+    notifyTypingRef.current = notifyTyping;
+    return () => {
+      unsubscribe();
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, [myId]);
+
+  const lastTypingSentRef = useRef(0);
+  function notifyTyping() {
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return;
+    lastTypingSentRef.current = now;
+    notifyTypingRef.current();
+  }
+
   const messages = useMemo(() => messagesQuery.data ?? [], [messagesQuery.data]);
+
+  useEffect(() => {
+    setPartnerTyping((wasTyping) => {
+      if (!wasTyping) return wasTyping;
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      return false;
+    });
+  }, [messages.length]);
 
   useEffect(() => {
     if (!myId) return;
@@ -87,6 +121,8 @@ export function useChatData() {
     myId,
     partner,
     partnerOnline,
+    partnerTyping,
+    notifyTyping,
     messages,
     reactions: reactionsQuery.data ?? [],
     isLoading: messagesQuery.isLoading,

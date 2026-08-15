@@ -37,7 +37,8 @@ function groupByDay(messages: ChatMessage[]): DayGroup[] {
 }
 
 export function ChatScreen() {
-  const { myId, partner, partnerOnline, messages, reactions, sendText, sendPhoto, sendingPhoto, react } = useChatData();
+  const { myId, partner, partnerOnline, partnerTyping, notifyTyping, messages, reactions, sendText, sendPhoto, sendingPhoto, react } =
+    useChatData();
   const [text, setText] = useState('');
   const [emojiOpen, setEmojiOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +48,7 @@ export function ChatScreen() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [messages.length]);
+  }, [messages.length, partnerTyping]);
 
   const lastMine = [...messages].reverse().find((m) => m.senderId === myId);
 
@@ -113,6 +114,14 @@ export function ChatScreen() {
             {lastMine.readAt ? `Vu ${formatTime(lastMine.readAt)}` : 'Envoyé'}
           </div>
         )}
+
+        {partnerTyping && (
+          <div className="typing">
+            <i />
+            <i />
+            <i />
+          </div>
+        )}
       </div>
 
       {emojiOpen && (
@@ -139,7 +148,10 @@ export function ChatScreen() {
           <input
             type="text"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              if (e.target.value.trim()) notifyTyping();
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSend();
             }}

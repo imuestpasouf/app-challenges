@@ -141,3 +141,19 @@ export function subscribeToChat(onMessagesChange: MessagesChangeHandler, onReact
     supabase.removeChannel(channel);
   };
 }
+
+export function subscribeToTyping(onPartnerTyping: () => void) {
+  const channel = supabase
+    .channel('chat-typing', { config: { broadcast: { self: false } } })
+    .on('broadcast', { event: 'typing' }, () => onPartnerTyping())
+    .subscribe();
+
+  return {
+    notifyTyping: () => {
+      void channel.send({ type: 'broadcast', event: 'typing', payload: {} });
+    },
+    unsubscribe: () => {
+      supabase.removeChannel(channel);
+    },
+  };
+}
