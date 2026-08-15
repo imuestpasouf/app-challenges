@@ -73,13 +73,24 @@ svg, svg * {
   outline: none;
 }
 
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: #05070c;
   color: var(--text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+}
+
+#root {
+  height: 100%;
 }
 
 .tabular-nums {
@@ -125,13 +136,19 @@ body {
 /* ====== app shell ====== */
 .app-shell {
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   max-width: 430px;
   margin: 0 auto;
+  overflow: hidden;
 }
 .screen {
   position: relative;
   z-index: 10;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
   padding: 4px 16px 128px;
 }
 
@@ -194,7 +211,6 @@ body {
   background: rgba(120, 134, 232, 0.3);
 }
 .ring { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
-.ring svg { transform: rotate(-90deg); }
 .ring circle.p { stroke-dasharray: 239; stroke-dashoffset: 239; transition: stroke-dashoffset 1.6s var(--spring); }
 .ring .v { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .ring .v b { font-size: 29px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text); }
@@ -388,7 +404,7 @@ body {
 .chead .who span { font-size: 11.5px; color: var(--green); font-weight: 600; }
 
 /* ===== chat : fil ===== */
-.scroll { position: relative; z-index: 10; flex: 1; overflow-y: auto; padding: 14px 14px 20px; display: flex; flex-direction: column; }
+.scroll { position: relative; z-index: 10; flex: 1; overflow-y: auto; overscroll-behavior-y: none; -webkit-overflow-scrolling: touch; padding: 14px 14px 20px; display: flex; flex-direction: column; }
 .datesep {
   align-self: center; font-size: 10.5px; font-weight: 600; color: var(--text-2); letter-spacing: 0.05em;
   padding: 6px 15px; border-radius: 99px; margin-bottom: 14px;

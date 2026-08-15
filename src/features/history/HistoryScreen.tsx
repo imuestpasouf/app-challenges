@@ -162,7 +162,7 @@ export function HistoryScreen() {
             <div className="vlab">{v.label}</div>
             <div className="vrow">
               {v.z && <span className="vdot" style={{ background: ZONE_HEX[v.z.zone] }} />}
-              <span className="vval" style={{ color: v.z ? (v.z.zone === 'black' ? 'var(--label)' : shade(ZONE_HEX[v.z.zone], -14)) : 'var(--label)' }}>
+              <span className="vval" style={{ color: v.z ? (v.z.zone === 'black' ? 'var(--text)' : shade(ZONE_HEX[v.z.zone], -14)) : 'var(--text)' }}>
                 {v.avg !== null ? fmt(v.avg) : '–'}
               </span>
             </div>
@@ -238,7 +238,7 @@ export function HistoryScreen() {
                 {day.wd} {day.date.getDate()}/{day.date.getMonth() + 1}
                 {day.isToday && " · aujourd'hui"}
               </div>
-              <b style={{ color: z ? ZONE_HEX[z.zone] : 'var(--label-3)' }}>{day.balance !== null ? `${fmt(day.balance)} kcal` : '–'}</b>
+              <b style={{ color: z ? ZONE_HEX[z.zone] : 'var(--text-3)' }}>{day.balance !== null ? `${fmt(day.balance)} kcal` : '–'}</b>
             </div>
           );
         })}

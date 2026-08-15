@@ -17,7 +17,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="app-shell" style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: 'var(--label-2)' }}>
+      <div className="app-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)' }}>
         <Wallpaper />
         Chargement…
       </div>

@@ -74,7 +74,7 @@ export function ChatScreen() {
         </div>
         <div className="who">
           <b>{partner?.name ?? '…'}</b>
-          <span style={{ color: partnerOnline ? undefined : 'var(--label-3)' }}>{partnerOnline ? '● en ligne' : 'hors ligne'}</span>
+          <span style={{ color: partnerOnline ? undefined : 'var(--text-3)' }}>{partnerOnline ? '● en ligne' : 'hors ligne'}</span>
         </div>
       </div>
 

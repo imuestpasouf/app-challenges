@@ -108,7 +108,7 @@ export function SettingsScreen() {
                   fontWeight: 700,
                   border: '0.5px solid rgba(255,255,255,.7)',
                   background: 'rgba(255,255,255,.4)',
-                  color: 'var(--label)',
+                  color: 'var(--text)',
                   opacity: disableMutation.isPending ? 0.6 : 1,
                 }}
               >

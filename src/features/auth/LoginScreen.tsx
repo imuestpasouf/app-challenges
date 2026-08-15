@@ -22,7 +22,7 @@ export function LoginScreen() {
   return (
     <div className="page-enter" style={{ position: 'relative', zIndex: 10, display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }}>
       <div className="glass gcard" style={{ width: '100%', maxWidth: 360 }}>
-        <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--label-2)', fontWeight: 600 }}>
+        <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-2)', fontWeight: 600 }}>
           Challenges & Vie Partagée
         </p>
         <h1 style={{ marginTop: 8, fontSize: 24, fontWeight: 800 }}>Connexion</h1>
