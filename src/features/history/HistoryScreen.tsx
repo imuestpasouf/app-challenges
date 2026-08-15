@@ -7,7 +7,7 @@ import { zone } from '../../domain/calories';
 import { monthlyAverage, totalAverage, weeklyAverage, type DailyBalance } from '../../domain/stats';
 import { findBurnedField, findEatenField } from '../../lib/fieldMatch';
 import { addDays, toDateKey, todayKey } from '../../lib/date';
-import { ZONE_HEX, shade } from '../../lib/color';
+import { ZONE_HEX, hexA } from '../../lib/color';
 
 const WINDOW_DAYS = 40;
 const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
@@ -144,12 +144,7 @@ export function HistoryScreen() {
     <section className="page-enter screen">
       <div className="ltitle">
         <div className="k">Ton parcours</div>
-        <h1>
-          Historique{' '}
-          <span style={{ background: 'linear-gradient(120deg,var(--brand),var(--brand-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
-            en couleurs
-          </span>
-        </h1>
+        <h1>Historique en couleurs</h1>
       </div>
 
       <div className="vitals">
@@ -162,7 +157,7 @@ export function HistoryScreen() {
             <div className="vlab">{v.label}</div>
             <div className="vrow">
               {v.z && <span className="vdot" style={{ background: ZONE_HEX[v.z.zone] }} />}
-              <span className="vval" style={{ color: v.z ? (v.z.zone === 'black' ? 'var(--text)' : shade(ZONE_HEX[v.z.zone], -14)) : 'var(--text)' }}>
+              <span className="vval" style={{ color: v.z ? ZONE_HEX[v.z.zone] : 'var(--text)' }}>
                 {v.avg !== null ? fmt(v.avg) : '–'}
               </span>
             </div>
@@ -195,7 +190,7 @@ export function HistoryScreen() {
                     key={ri}
                     title={day.balance !== null ? `${day.wd} ${day.date.getDate()}/${day.date.getMonth() + 1} · ${fmt(day.balance)} kcal` : undefined}
                     className={`mcell${day.balance !== null ? ' fill' : ''}${day.isToday ? ' today' : ''}`}
-                    style={{ background: z ? ZONE_HEX[z.zone] : undefined, animationDelay: delay }}
+                    style={{ background: z ? hexA(ZONE_HEX[z.zone], 0.92) : undefined, animationDelay: delay }}
                   />
                 );
               })}
@@ -212,7 +207,7 @@ export function HistoryScreen() {
         </div>
       </div>
 
-      <div className="insight">
+      <div className="glass insight">
         <span className="fl">🔥</span>
         <div className="it">
           <b>Meilleure série verte</b>
