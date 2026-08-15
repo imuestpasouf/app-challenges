@@ -253,7 +253,7 @@ body {
 .hero .lab { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; color: var(--text-2); }
 .hero .chip { padding: 4px 12px; border-radius: 99px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; box-shadow: var(--rim); }
 .hero .net { font-size: 70px; font-weight: 700; letter-spacing: -0.05em; line-height: 1; margin: 12px 0 4px; font-variant-numeric: tabular-nums; color: var(--text); }
-.hero .unit { font-size: 16px; font-weight: 600; color: var(--text-2); margin-left: 6px; }
+.hero .unit { font-size: 16px; font-weight: 600; color: var(--text-2); margin-left: 6px; letter-spacing: normal; }
 .hero .verdict { font-size: 13.5px; font-weight: 600; }
 
 .split { display: flex; gap: 10px; margin-bottom: 15px; }
