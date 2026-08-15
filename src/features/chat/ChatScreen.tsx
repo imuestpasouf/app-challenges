@@ -66,7 +66,7 @@ export function ChatScreen() {
   }
 
   return (
-    <div className="page-enter" style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 100px)' }}>
+    <div className="page-enter" style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: 'calc(100% - 86px)' }}>
       <div className="chead">
         <div className="av">
           {partner?.name?.[0]?.toUpperCase() ?? '?'}
