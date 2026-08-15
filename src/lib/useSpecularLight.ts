@@ -12,8 +12,8 @@ export function useSpecularLight() {
     function setLight(nx: number, ny: number) {
       const cx = Math.max(-1, Math.min(1, nx));
       const cy = Math.max(-1, Math.min(1, ny));
-      root.style.setProperty('--sx', `${(cx * 90).toFixed(1)}px`);
-      root.style.setProperty('--sy', `${(cy * 90).toFixed(1)}px`);
+      root.style.setProperty('--sx', `${(cx * 95).toFixed(1)}px`);
+      root.style.setProperty('--sy', `${(cy * 95).toFixed(1)}px`);
     }
 
     function handleMouseMove(e: MouseEvent) {

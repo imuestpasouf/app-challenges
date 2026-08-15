@@ -20,7 +20,7 @@ export function HomeScreen() {
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 60);
+    const t = setTimeout(() => setMounted(true), 300);
     return () => clearTimeout(t);
   }, []);
 
@@ -70,15 +70,15 @@ export function HomeScreen() {
         <div className="glass counter">
           <div className="ring">
             <svg width="90" height="90" viewBox="0 0 90 90">
-              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,.32)" strokeWidth="9" />
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(20,40,52,.14)" strokeWidth="8" />
               <circle
                 className="p"
                 cx="45"
                 cy="45"
                 r="38"
                 fill="none"
-                stroke="#fff"
-                strokeWidth="9"
+                stroke="#4C5BD4"
+                strokeWidth="8"
                 strokeLinecap="round"
                 strokeDashoffset={mounted ? ringOffset : RING_CIRCUMFERENCE}
               />
