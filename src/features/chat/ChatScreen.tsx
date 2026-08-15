@@ -76,6 +76,13 @@ export function ChatScreen() {
           <b>{partner?.name ?? '…'}</b>
           <span style={{ color: partnerOnline ? undefined : 'var(--text-3)' }}>{partnerOnline ? '● en ligne' : 'hors ligne'}</span>
         </div>
+        <div className="act">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+        </div>
       </div>
 
       <div ref={scrollRef} className="scroll">
@@ -98,7 +105,13 @@ export function ChatScreen() {
         ))}
 
         {lastMine && (
-          <div className="receipt">{lastMine.readAt ? `Vu ${formatTime(lastMine.readAt)}` : 'Envoyé'}</div>
+          <div className="receipt" style={{ color: lastMine.readAt ? 'var(--brand)' : 'var(--text-3)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6 7 17l-5-5" />
+              {lastMine.readAt && <path d="m22 10-7.5 7.5L13 16" />}
+            </svg>
+            {lastMine.readAt ? `Vu ${formatTime(lastMine.readAt)}` : 'Envoyé'}
+          </div>
         )}
       </div>
 
