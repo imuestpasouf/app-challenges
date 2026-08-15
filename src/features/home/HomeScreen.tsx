@@ -68,7 +68,7 @@ export function HomeScreen() {
 
       {totalActive > 0 && (
         <div className="glass counter">
-          <div className="ring">
+          <div className="progress-ring">
             <svg width="90" height="90" viewBox="0 0 90 90">
               <g transform="rotate(-90 45 45)">
                 <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(20,40,52,.14)" strokeWidth="8" />
