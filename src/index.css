@@ -52,6 +52,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+svg, svg * {
+  border: none;
+  outline: none;
+}
+
 body {
   margin: 0;
   background: var(--color-bg);
@@ -317,7 +322,7 @@ body {
 .field-card { border-radius: 22px; padding: 12px; background: rgba(255, 255, 255, 0.5); border: 0.5px solid rgba(255, 255, 255, 0.7); }
 .field-card input, .field-card select, .plain-input {
   width: 100%; border-radius: 14px; border: 0.5px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.55);
-  padding: 10px 12px; font-family: inherit; font-size: 14px; color: var(--label); outline: none;
+  padding: 10px 12px; font-family: inherit; font-size: 16px; color: var(--label); outline: none;
 }
 .field-card input::placeholder, .plain-input::placeholder { color: var(--label-3); }
 .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 0.5px solid rgba(255, 255, 255, 0.4); }
@@ -467,7 +472,7 @@ body {
 .cbtn:active { transform: scale(0.88); }
 .cbtn svg { width: 20px; height: 20px; }
 .field { flex: 1; display: flex; align-items: center; min-height: 40px; padding: 0 6px 0 14px; border-radius: 24px; background: rgba(255, 255, 255, 0.45); border: 0.5px solid rgba(255, 255, 255, 0.6); }
-.field input { flex: 1; border: 0; outline: 0; background: none; font-family: inherit; font-size: 14.5px; color: var(--label); padding: 9px 0; }
+.field input { flex: 1; border: 0; outline: 0; background: none; font-family: inherit; font-size: 16px; color: var(--label); padding: 9px 0; }
 .field input::placeholder { color: var(--label-3); }
 .field .em { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; font-size: 18px; flex-shrink: 0; border: none; background: none; }
 .send {
