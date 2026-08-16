@@ -15,6 +15,10 @@ export function todayKey(): string {
   return toDateKey(new Date());
 }
 
+export function yearMonthKey(date: Date = new Date()): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
 export function diffDays(from: Date, to: Date): number {
   const ms = Date.UTC(to.getFullYear(), to.getMonth(), to.getDate()) - Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
   return Math.round(ms / 86_400_000);

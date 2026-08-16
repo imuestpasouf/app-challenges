@@ -76,6 +76,9 @@ export interface ShoppingItem {
   checked: boolean;
   addedBy: string | null;
   createdAt: string;
+  qty: string | null;
+  checkedAt: string | null;
+  checkedBy: string | null;
 }
 
 export interface Expense {
@@ -86,7 +89,29 @@ export interface Expense {
   note: string | null;
   expenseDate: string;
   createdAt: string;
+  label: string | null;
 }
+
+export interface MonthlyBudget {
+  id: string;
+  yearMonth: string;
+  amount: number;
+  updatedBy: string | null;
+  updatedAt: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  label: string;
+  icon: string | null;
+  quantity: number;
+  unit: string | null;
+  minQty: number;
+  updatedBy: string | null;
+  updatedAt: string;
+}
+
+export type StockStatus = 'epuise' | 'bas' | 'ok';
 
 export interface ChatMessage {
   id: string;

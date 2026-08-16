@@ -118,7 +118,10 @@ create table public.shopping_items (
   label      text not null,
   checked    boolean not null default false,
   added_by   uuid references public.profiles(id) on delete set null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  qty        text,
+  checked_at timestamptz,
+  checked_by uuid references public.profiles(id) on delete set null
 );
 
 create table public.expenses (
@@ -128,7 +131,28 @@ create table public.expenses (
   paid_by      uuid references public.profiles(id) on delete set null,
   note         text,
   expense_date date not null default current_date,
-  created_at   timestamptz not null default now()
+  created_at   timestamptz not null default now(),
+  label        text
+);
+
+-- ---------- COURSES & INVENTAIRE ----------
+create table public.monthly_budgets (
+  id          uuid primary key default gen_random_uuid(),
+  year_month  text not null unique,            -- format 'YYYY-MM'
+  amount      numeric(10,2) not null,
+  updated_by  uuid references public.profiles(id) on delete set null,
+  updated_at  timestamptz not null default now()
+);
+
+create table public.inventory_items (
+  id          uuid primary key default gen_random_uuid(),
+  label       text not null,
+  icon        text,                             -- emoji
+  quantity    numeric(10,2) not null default 0,
+  unit        text,                             -- 'kg', 'paquets', 'L'...
+  min_qty     numeric(10,2) not null default 1, -- seuil "stock bas"
+  updated_by  uuid references public.profiles(id) on delete set null,
+  updated_at  timestamptz not null default now()
 );
 
 create table public.chat_messages (
@@ -155,6 +179,9 @@ create table public.push_subscriptions (
 alter publication supabase_realtime add table public.chat_messages;
 alter publication supabase_realtime add table public.shopping_items;
 alter publication supabase_realtime add table public.planning_events;
+alter publication supabase_realtime add table public.monthly_budgets;
+alter publication supabase_realtime add table public.inventory_items;
+alter publication supabase_realtime add table public.expenses;
 
 -- ============================================================
 -- ROW LEVEL SECURITY
@@ -168,6 +195,8 @@ alter table public.notes                enable row level security;
 alter table public.planning_events      enable row level security;
 alter table public.shopping_items       enable row level security;
 alter table public.expenses             enable row level security;
+alter table public.monthly_budgets      enable row level security;
+alter table public.inventory_items      enable row level security;
 alter table public.chat_messages        enable row level security;
 alter table public.push_subscriptions   enable row level security;
 
@@ -209,6 +238,11 @@ create policy "shopping_shared_all" on public.shopping_items
   for all using (auth.uid() is not null) with check (auth.uid() is not null);
 
 create policy "expenses_shared_all" on public.expenses
+  for all using (auth.uid() is not null) with check (auth.uid() is not null);
+
+create policy "budgets_shared" on public.monthly_budgets
+  for all using (auth.uid() is not null) with check (auth.uid() is not null);
+create policy "inventory_shared" on public.inventory_items
   for all using (auth.uid() is not null) with check (auth.uid() is not null);
 
 -- Chat : lecture pour les 2, insertion en tant que soi, update (read_at) pour les 2

@@ -1,10 +1,17 @@
 import type { Zone } from '../domain/calories';
+import type { BudgetZone } from '../domain/budget';
 
 export const ZONE_HEX: Record<Zone, string> = {
-  green: '#34C759',
-  amber: '#FF9F0A',
-  red: '#FF3B30',
-  black: '#1C1C1E',
+  green: '#1DA65A',
+  amber: '#D9930B',
+  red: '#E03127',
+  black: '#2B3440',
+};
+
+export const BUDGET_ZONE_HEX: Record<BudgetZone, string> = {
+  green: '#1DA65A',
+  amber: '#D9930B',
+  red: '#E03127',
 };
 
 export const ZONE_NAME: Record<Zone, string> = {
