@@ -4,7 +4,7 @@ import { useAuth } from '../../app/useAuth';
 import { getOrCreateMyPrefs, updateMyPrefs } from '../../api/notificationPrefs';
 import { disablePush, enablePush, getPushSubscriptionEndpoint, isPushSupported } from '../../lib/push';
 import { Button } from '../../components/Button';
-import { useResurrectionData } from '../resurrection/useResurrectionData';
+import { useIsNassim, useResurrectionData } from '../resurrection/useResurrectionData';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
 
@@ -27,7 +27,8 @@ export function SettingsScreen() {
   const prefsQuery = useQuery({ queryKey: ['notification-prefs'], queryFn: getOrCreateMyPrefs });
   const prefs = prefsQuery.data;
 
-  const resurrection = useResurrectionData();
+  const isNassim = useIsNassim();
+  const resurrection = useResurrectionData(isNassim);
   const [confirmingStop, setConfirmingStop] = useState(false);
 
   const [subscribed, setSubscribed] = useState(false);

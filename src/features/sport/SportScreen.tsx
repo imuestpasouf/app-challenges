@@ -9,7 +9,7 @@ import { findBurnedField, findEatenField } from '../../lib/fieldMatch';
 import { todayKey } from '../../lib/date';
 import { ZONE_HEX, ZONE_NAME, hexA } from '../../lib/color';
 import { RESURRECTION_ACTIVATED_EVENT } from '../../lib/resurrectionEvent';
-import { useResurrectionData } from '../resurrection/useResurrectionData';
+import { useIsNassim, useResurrectionData } from '../resurrection/useResurrectionData';
 import { ConfigSheet } from '../resurrection/ConfigSheet';
 import { WeighSheet } from '../resurrection/WeighSheet';
 import { MilestonesList } from '../resurrection/MilestonesList';
@@ -84,8 +84,9 @@ export function SportScreen() {
     },
   });
 
-  // ===== Mode Résurrection =====
-  const resurrection = useResurrectionData();
+  // ===== Mode Résurrection — réglage strictement personnel de Nassim, invisible pour l'autre =====
+  const isNassim = useIsNassim();
+  const resurrection = useResurrectionData(isNassim);
   const { mode, isActive, milestones, weightEntries, currentWeight } = resurrection;
 
   const rangeEntriesQuery = useQuery({
@@ -226,7 +227,7 @@ export function SportScreen() {
         </div>
       )}
 
-      {!isActive && (
+      {isNassim && !isActive && (
         <div className="glass togcard">
           <div className="togtop">
             <div className="togico">🔥</div>

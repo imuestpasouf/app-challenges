@@ -13,13 +13,14 @@ import { SettingsScreen } from './features/settings/SettingsScreen';
 import { TabBar } from './components/TabBar';
 import { Wallpaper } from './components/Wallpaper';
 import { useSpecularLight } from './lib/useSpecularLight';
-import { useIsResurrectionActive } from './features/resurrection/useResurrectionData';
+import { useIsNassim, useIsResurrectionActive } from './features/resurrection/useResurrectionData';
 import { RESURRECTION_ACTIVATED_EVENT } from './lib/resurrectionEvent';
 
 function App() {
   const { session, loading } = useAuth();
   useSpecularLight();
-  const isResurrectionActive = useIsResurrectionActive(!!session);
+  const isNassim = useIsNassim();
+  const isResurrectionActive = useIsResurrectionActive(!!session && isNassim);
   const [flash, setFlash] = useState(false);
 
   useEffect(() => {
