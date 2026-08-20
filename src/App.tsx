@@ -7,6 +7,7 @@ import { HistoryScreen } from './features/history/HistoryScreen';
 import { NewChallengeScreen } from './features/challenges/NewChallengeScreen';
 import { ChatScreen } from './features/chat/ChatScreen';
 import { ShoppingScreen } from './features/shopping/ShoppingScreen';
+import { ReadingScreen } from './features/reading/ReadingScreen';
 import { SettingsScreen } from './features/settings/SettingsScreen';
 import { TabBar } from './components/TabBar';
 import { Wallpaper } from './components/Wallpaper';
@@ -44,6 +45,7 @@ function App() {
         <Route path="/challenges/new" element={<NewChallengeScreen />} />
         <Route path="/chat" element={<ChatScreen />} />
         <Route path="/shopping" element={<ShoppingScreen />} />
+        <Route path="/reading" element={<ReadingScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       <TabBar />

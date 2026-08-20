@@ -8,6 +8,7 @@ import { categoryStyle } from '../../lib/category';
 import { CategoryIconGlyph } from '../../components/CategoryIcon';
 import { useChallengeCards } from './useChallengeCards';
 import { useShoppingSummary } from '../shopping/useShoppingSummary';
+import { useReadingSummary } from '../reading/useReadingSummary';
 
 const RING_CIRCUMFERENCE = 239;
 
@@ -26,6 +27,7 @@ export function HomeScreen() {
   }, []);
 
   const { subtitle: shoppingSubtitle } = useShoppingSummary();
+  const { subtitle: readingSubtitle } = useReadingSummary();
 
   const challengesQuery = useQuery({ queryKey: ['challenges'], queryFn: listChallenges });
   const challenges = challengesQuery.data ?? [];
@@ -116,6 +118,25 @@ export function HomeScreen() {
         <div className="ctatxt">
           <b>Courses &amp; maison</b>
           <span>{shoppingSubtitle}</span>
+        </div>
+        <div className="ctago">›</div>
+      </button>
+
+      <button
+        type="button"
+        className="glass ctacard book"
+        onClick={() => navigate('/reading')}
+        style={{ width: '100%', textAlign: 'left', border: 'none' }}
+      >
+        <div className="ctaico book">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+        </div>
+        <div className="ctatxt">
+          <b>Lecture à deux</b>
+          <span>{readingSubtitle}</span>
         </div>
         <div className="ctago">›</div>
       </button>

@@ -164,6 +164,75 @@ create table public.chat_messages (
 );
 create index on public.chat_messages(created_at);
 
+-- ---------- LECTURE PARTAGÉE ----------
+create type reading_status as enum ('en_cours','termine','abandonne');
+
+create table public.books (
+  id             uuid primary key default gen_random_uuid(),
+  title          text not null,
+  author         text,
+  cover_emoji    text default '📖',
+  total_chapters int not null check (total_chapters > 0),
+  status         reading_status not null default 'en_cours',
+  started_at     date not null default current_date,
+  finished_at    date,
+  created_by     uuid references public.profiles(id) on delete set null,
+  created_at     timestamptz not null default now()
+);
+
+create table public.reading_positions (
+  id           uuid primary key default gen_random_uuid(),
+  book_id      uuid not null references public.books(id) on delete cascade,
+  user_id      uuid not null references public.profiles(id) on delete cascade,
+  last_chapter int not null default 0 check (last_chapter >= 0),
+  updated_at   timestamptz not null default now(),
+  unique (book_id, user_id)
+);
+
+create table public.reading_sessions (
+  id           uuid primary key default gen_random_uuid(),
+  book_id      uuid not null references public.books(id) on delete cascade,
+  user_id      uuid not null references public.profiles(id) on delete cascade,
+  from_chapter int not null,
+  to_chapter   int not null,
+  read_at      timestamptz not null default now(),
+  check (to_chapter >= from_chapter)
+);
+create index on public.reading_sessions(book_id, user_id);
+
+create table public.chapter_comments (
+  id         uuid primary key default gen_random_uuid(),
+  book_id    uuid not null references public.books(id) on delete cascade,
+  chapter    int not null check (chapter > 0),
+  author_id  uuid not null references public.profiles(id) on delete cascade,
+  content    text not null,
+  sealed     boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index on public.chapter_comments(book_id, chapter);
+
+create table public.chapter_quotes (
+  id         uuid primary key default gen_random_uuid(),
+  book_id    uuid not null references public.books(id) on delete cascade,
+  chapter    int not null check (chapter > 0),
+  author_id  uuid not null references public.profiles(id) on delete cascade,
+  content    text not null,
+  page       int,
+  sealed     boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create index on public.chapter_quotes(book_id, chapter);
+
+create table public.chapter_ratings (
+  id         uuid primary key default gen_random_uuid(),
+  book_id    uuid not null references public.books(id) on delete cascade,
+  chapter    int not null check (chapter > 0),
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  rating     int not null check (rating between 1 and 5),
+  created_at timestamptz not null default now(),
+  unique (book_id, chapter, user_id)
+);
+
 -- ---------- PUSH (Web Push) ----------
 create table public.push_subscriptions (
   id         uuid primary key default gen_random_uuid(),
@@ -182,6 +251,10 @@ alter publication supabase_realtime add table public.planning_events;
 alter publication supabase_realtime add table public.monthly_budgets;
 alter publication supabase_realtime add table public.inventory_items;
 alter publication supabase_realtime add table public.expenses;
+alter publication supabase_realtime add table public.reading_positions;
+alter publication supabase_realtime add table public.chapter_comments;
+alter publication supabase_realtime add table public.chapter_quotes;
+alter publication supabase_realtime add table public.chapter_ratings;
 
 -- ============================================================
 -- ROW LEVEL SECURITY
@@ -199,6 +272,12 @@ alter table public.monthly_budgets      enable row level security;
 alter table public.inventory_items      enable row level security;
 alter table public.chat_messages        enable row level security;
 alter table public.push_subscriptions   enable row level security;
+alter table public.books                enable row level security;
+alter table public.reading_positions    enable row level security;
+alter table public.reading_sessions     enable row level security;
+alter table public.chapter_comments     enable row level security;
+alter table public.chapter_quotes       enable row level security;
+alter table public.chapter_ratings      enable row level security;
 
 -- ---- PROFILS : lisibles par les authentifiés, modifiables par soi ----
 create policy "profiles_select" on public.profiles
@@ -255,6 +334,35 @@ create policy "chat_update" on public.chat_messages
 
 -- ---- PUSH : soi uniquement ----
 create policy "push_self_all" on public.push_subscriptions
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- ---- LECTURE PARTAGÉE : tout partagé, écriture attribuée à son auteur ----
+create policy "books_shared" on public.books
+  for all using (auth.uid() is not null) with check (auth.uid() is not null);
+
+create policy "positions_select" on public.reading_positions
+  for select using (auth.uid() is not null);
+create policy "positions_self" on public.reading_positions
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create policy "sessions_select" on public.reading_sessions
+  for select using (auth.uid() is not null);
+create policy "sessions_self" on public.reading_sessions
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create policy "comments_select" on public.chapter_comments
+  for select using (auth.uid() is not null);
+create policy "comments_self" on public.chapter_comments
+  for all using (author_id = auth.uid()) with check (author_id = auth.uid());
+
+create policy "quotes_select" on public.chapter_quotes
+  for select using (auth.uid() is not null);
+create policy "quotes_self" on public.chapter_quotes
+  for all using (author_id = auth.uid()) with check (author_id = auth.uid());
+
+create policy "ratings_select" on public.chapter_ratings
+  for select using (auth.uid() is not null);
+create policy "ratings_self" on public.chapter_ratings
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 -- ============================================================

@@ -113,6 +113,68 @@ export interface InventoryItem {
 
 export type StockStatus = 'epuise' | 'bas' | 'ok';
 
+export type ReadingStatus = 'en_cours' | 'termine' | 'abandonne';
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string | null;
+  coverEmoji: string;
+  totalChapters: number;
+  status: ReadingStatus;
+  startedAt: string;
+  finishedAt: string | null;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+export interface ReadingPosition {
+  id: string;
+  bookId: string;
+  userId: string;
+  lastChapter: number;
+  updatedAt: string;
+}
+
+export interface ReadingSession {
+  id: string;
+  bookId: string;
+  userId: string;
+  fromChapter: number;
+  toChapter: number;
+  readAt: string;
+}
+
+export interface ChapterComment {
+  id: string;
+  bookId: string;
+  chapter: number;
+  authorId: string;
+  content: string;
+  sealed: boolean;
+  createdAt: string;
+}
+
+export interface ChapterQuote {
+  id: string;
+  bookId: string;
+  chapter: number;
+  authorId: string;
+  content: string;
+  page: number | null;
+  sealed: boolean;
+  createdAt: string;
+}
+
+export interface ChapterRating {
+  id: string;
+  bookId: string;
+  chapter: number;
+  userId: string;
+  rating: number;
+  createdAt: string;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
