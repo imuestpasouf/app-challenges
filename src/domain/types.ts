@@ -175,6 +175,41 @@ export interface ChapterRating {
   createdAt: string;
 }
 
+export type ResurrectionStatus = 'actif' | 'termine' | 'arrete';
+
+export interface ResurrectionMode {
+  id: string;
+  userId: string;
+  startDate: string;
+  endDate: string;
+  startWeight: number;
+  targetWeight: number;
+  status: ResurrectionStatus;
+  createdAt: string;
+  endedAt: string | null;
+}
+
+export interface ResurrectionMilestone {
+  id: string;
+  modeId: string;
+  targetDate: string;
+  targetWeight: number;
+  position: number;
+  reached: boolean | null;
+  reachedWeight: number | null;
+}
+
+export interface WeightEntry {
+  id: string;
+  userId: string;
+  entryDate: string;
+  weight: number;
+  createdAt: string;
+}
+
+export type TrackStatus = 'ahead' | 'slightly_behind' | 'behind';
+export type MilestoneState = 'done' | 'missed' | 'current' | 'upcoming';
+
 export interface ChatMessage {
   id: string;
   senderId: string;

@@ -233,6 +233,61 @@ create table public.chapter_ratings (
   unique (book_id, chapter, user_id)
 );
 
+-- ---------- MODE RÉSURRECTION ----------
+create type resurrection_status as enum ('actif','termine','arrete');
+
+create table public.resurrection_modes (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references public.profiles(id) on delete cascade,
+  start_date    date not null,
+  end_date      date not null,
+  start_weight  numeric(5,2) not null,
+  target_weight numeric(5,2) not null,
+  status        resurrection_status not null default 'actif',
+  created_at    timestamptz not null default now(),
+  ended_at      timestamptz,
+  check (end_date > start_date),
+  check (target_weight < start_weight)
+);
+create unique index resurrection_one_active
+  on public.resurrection_modes(user_id) where status = 'actif';
+
+create table public.resurrection_milestones (
+  id              uuid primary key default gen_random_uuid(),
+  mode_id         uuid not null references public.resurrection_modes(id) on delete cascade,
+  target_date     date not null,
+  target_weight   numeric(5,2) not null,
+  position        int not null,
+  reached         boolean,
+  reached_weight  numeric(5,2),
+  unique (mode_id, position)
+);
+
+create table public.weight_entries (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  entry_date date not null,
+  weight     numeric(5,2) not null check (weight > 20 and weight < 400),
+  created_at timestamptz not null default now(),
+  unique (user_id, entry_date)
+);
+create index on public.weight_entries(user_id, entry_date);
+
+alter table public.resurrection_modes      enable row level security;
+alter table public.resurrection_milestones enable row level security;
+alter table public.weight_entries          enable row level security;
+
+create policy "resurrection_self" on public.resurrection_modes
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create policy "resurrection_ms_via_mode" on public.resurrection_milestones
+  for all
+  using     (exists (select 1 from public.resurrection_modes m where m.id = mode_id and m.user_id = auth.uid()))
+  with check (exists (select 1 from public.resurrection_modes m where m.id = mode_id and m.user_id = auth.uid()));
+
+create policy "weights_self" on public.weight_entries
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 -- ---------- PUSH (Web Push) ----------
 create table public.push_subscriptions (
   id         uuid primary key default gen_random_uuid(),

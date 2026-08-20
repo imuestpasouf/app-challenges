@@ -1,12 +1,19 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getChallengeByCategory, listFields } from '../../api/challenges';
 import { listEntries, upsertEntry } from '../../api/entries';
 import { zone } from '../../domain/calories';
+import { counters as computeCounters, dayIndex, targetAt, trackStatus, trajectoryNodes } from '../../domain/resurrection';
 import { findBurnedField, findEatenField } from '../../lib/fieldMatch';
 import { todayKey } from '../../lib/date';
 import { ZONE_HEX, ZONE_NAME, hexA } from '../../lib/color';
+import { RESURRECTION_ACTIVATED_EVENT } from '../../lib/resurrectionEvent';
+import { useResurrectionData } from '../resurrection/useResurrectionData';
+import { ConfigSheet } from '../resurrection/ConfigSheet';
+import { WeighSheet } from '../resurrection/WeighSheet';
+import { MilestonesList } from '../resurrection/MilestonesList';
+import { CombinedChart } from '../resurrection/CombinedChart';
 
 const RANGE_MIN = -1800;
 const RANGE_MAX = 900;
@@ -27,6 +34,7 @@ function fmt(n: number) {
 }
 
 export function SportScreen() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const today = todayKey();
 
@@ -76,6 +84,63 @@ export function SportScreen() {
     },
   });
 
+  // ===== Mode Résurrection =====
+  const resurrection = useResurrectionData();
+  const { mode, isActive, milestones, weightEntries, currentWeight } = resurrection;
+
+  const rangeEntriesQuery = useQuery({
+    queryKey: ['entries', challenge?.id, 'resurrection-range', mode?.startDate],
+    queryFn: () => listEntries(challenge!.id, { from: mode!.startDate, to: today }),
+    enabled: !!challenge && !!eatField && !!burnField && isActive,
+  });
+
+  const dailyBalances = new Map<string, number>();
+  if (isActive && rangeEntriesQuery.data) {
+    const eatByDate = new Map<string, number>();
+    const burnByDate = new Map<string, number>();
+    for (const e of rangeEntriesQuery.data) {
+      if (e.value === null) continue;
+      const n = parseFloat(e.value);
+      if (Number.isNaN(n)) continue;
+      if (e.fieldId === eatField?.id) eatByDate.set(e.entryDate, n);
+      if (e.fieldId === burnField?.id) burnByDate.set(e.entryDate, n);
+    }
+    for (const [date, eat] of eatByDate) {
+      const burn = burnByDate.get(date);
+      if (burn !== undefined) dailyBalances.set(date, Math.round(eat - burn));
+    }
+  }
+
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [weighOpen, setWeighOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3400);
+  }
+
+  function openToggle() {
+    if (isActive) {
+      showToast('Le mode est déjà lancé. Tu peux ajuster les jalons dans les réglages.');
+      return;
+    }
+    setSheetOpen(true);
+  }
+
+  async function handleConfigSubmit(input: Parameters<typeof resurrection.createMode>[0]) {
+    await resurrection.createMode(input);
+    setSheetOpen(false);
+    window.dispatchEvent(new Event(RESURRECTION_ACTIVATED_EVENT));
+    showToast(`🔥 Mode Résurrection lancé — ${(input.startWeight - input.targetWeight).toFixed(1)} kg à perdre`);
+  }
+
+  async function handleWeighSubmit(weight: number) {
+    await resurrection.saveWeight(weight);
+    setWeighOpen(false);
+    showToast(`Pesée enregistrée : ${weight.toFixed(1)} kg`);
+  }
+
   if (challengeQuery.isLoading) {
     return <div className="screen note">Chargement…</div>;
   }
@@ -103,12 +168,131 @@ export function SportScreen() {
   const z = balance !== null ? zone(balance) : null;
   const color = z ? ZONE_HEX[z.zone] : ZONE_HEX.amber;
 
+  // valeurs dérivées du mode Résurrection actif
+  let targetToday = 0;
+  let cnt: ReturnType<typeof computeCounters> | null = null;
+  let track: ReturnType<typeof trackStatus> | null = null;
+  if (isActive && mode) {
+    const nodes = trajectoryNodes(mode, milestones);
+    targetToday = targetAt(dayIndex(new Date(), new Date(mode.startDate)), nodes);
+    cnt = computeCounters(mode, currentWeight, new Date());
+    track = trackStatus(currentWeight, targetToday, mode.targetWeight, cnt.daysLeft);
+  }
+
   return (
     <section className="page-enter screen">
-      <div className="ltitle">
-        <div className="k">Challenge sport · aujourd'hui</div>
-        <h1>Balance du jour</h1>
-      </div>
+      {!isActive && (
+        <div className="ltitle">
+          <div className="k">Challenge sport · aujourd'hui</div>
+          <h1>Balance du jour</h1>
+        </div>
+      )}
+
+      {isActive && mode && cnt && (
+        <div className="glass rescounter">
+          <div className="ctop">
+            <span>MODE RÉSURRECTION</span>
+            <span className="live">
+              <i />
+              ACTIF
+            </span>
+          </div>
+          <div className="cgrid">
+            <div className="cbox">
+              <div className="n">{cnt.daysLeft}</div>
+              <div className="l">JOURS RESTANTS</div>
+            </div>
+            <div className="csep" />
+            <div className="cbox">
+              <div className="n">
+                {cnt.kgLeft.toFixed(1)}
+                <small>kg</small>
+              </div>
+              <div className="l">RESTE À PERDRE</div>
+            </div>
+          </div>
+          <div className="cbar">
+            <i style={{ width: `${cnt.timeProgress}%` }} />
+          </div>
+          <div className="cends">
+            <span>
+              Jour {cnt.elapsed} / {cnt.total}
+            </span>
+            <span>
+              {new Date(mode.startDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })} →{' '}
+              {new Date(mode.endDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!isActive && (
+        <div className="glass togcard">
+          <div className="togtop">
+            <div className="togico">🔥</div>
+            <div className="togmeta">
+              <b>Mode Résurrection</b>
+              <span>Compte à rebours intensif</span>
+            </div>
+            <button type="button" className="switch" onClick={openToggle} aria-label="Activer le mode Résurrection">
+              <i />
+            </button>
+          </div>
+          <div className="togdesc">
+            Fixe un poids de départ, un objectif final et une échéance. Ton app passe en mode sombre et affiche en permanence le décompte des jours et des
+            kilos restants. Toutes les fonctionnalités existantes sont conservées. Réglage personnel : l'app de l'autre n'est pas modifiée.
+          </div>
+        </div>
+      )}
+
+      {isActive && mode && track && cnt && (
+        <>
+          <div className="now">
+            <div className="glass nowcard">
+              <div className="k">POIDS ACTUEL</div>
+              <div className="v">
+                {currentWeight.toFixed(1)}
+                <small> kg</small>
+              </div>
+              <div className="d" style={{ color: 'var(--green)' }}>
+                −{(mode.startWeight - currentWeight).toFixed(1)} kg depuis le départ
+              </div>
+            </div>
+            <div className="glass nowcard">
+              <div className="k">CIBLE DU JOUR</div>
+              <div className="v">
+                {targetToday.toFixed(1)}
+                <small> kg</small>
+              </div>
+              <div className="d" style={{ color: track.gap <= 0 ? 'var(--green)' : track.gap <= 1 ? 'var(--amber)' : 'var(--red)' }}>
+                {track.gap <= 0 ? `${Math.abs(track.gap).toFixed(1)} kg d'avance` : `${track.gap.toFixed(1)} kg de retard`}
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="glass rverdict"
+            style={{ background: track.status === 'ahead' ? 'rgba(48,209,88,.14)' : track.status === 'slightly_behind' ? 'rgba(255,214,10,.14)' : 'rgba(255,69,58,.14)' }}
+          >
+            <span className="em">{track.status === 'ahead' ? '🔥' : track.status === 'slightly_behind' ? '⚡' : '🎯'}</span>
+            <div className="t">
+              <b>{track.status === 'ahead' ? 'Dans les temps' : track.status === 'slightly_behind' ? 'Légèrement en retard' : 'Trajectoire à ajuster'}</b>
+              <span>
+                Reste {Math.max(0, currentWeight - mode.targetWeight).toFixed(1)} kg · {track.weeklyPaceNeeded.toFixed(2)} kg/sem sur {cnt.daysLeft} jours
+              </span>
+            </div>
+          </div>
+
+          <button type="button" className="cta" onClick={() => setWeighOpen(true)}>
+            Peser aujourd'hui
+          </button>
+
+          <div className="lbl">
+            <span>CALORIES DU JOUR</span>
+            <span>{new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</span>
+          </div>
+        </>
+      )}
 
       <div className="glass hero" style={{ background: hexA(color, 0.22) }}>
         <div className="lab">
@@ -218,6 +402,60 @@ export function SportScreen() {
       </div>
 
       <p className="note">Saisie manuelle en V1 · récupération auto Apple Santé prévue en V2</p>
+
+      {isActive && mode && (
+        <>
+          <CombinedChart mode={mode} milestones={milestones} weightEntries={weightEntries} dailyBalances={dailyBalances} isDark />
+          <MilestonesList mode={mode} milestones={milestones} weightEntries={weightEntries} currentWeight={currentWeight} />
+
+          <div className="lbl" style={{ marginTop: 18 }}>
+            <span>LE RESTE DE L'APP</span>
+            <span>inchangé</span>
+          </div>
+          <div className="glass" style={{ borderRadius: 30, padding: 6, marginBottom: 14 }}>
+            <button type="button" className="ms" style={{ background: 'transparent', width: '100%', border: 0, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }} onClick={() => navigate('/history')}>
+              <div className="ic" style={{ background: 'rgba(255,255,255,.09)' }}>
+                📊
+              </div>
+              <div className="m">
+                <b>Historique &amp; mosaïque</b>
+                <span>Balance calorique, moyennes glissantes</span>
+              </div>
+              <div className="r" style={{ fontSize: 20, color: 'var(--text-3)' }}>
+                ›
+              </div>
+            </button>
+            <button type="button" className="ms" style={{ background: 'transparent', width: '100%', border: 0, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }} onClick={() => navigate('/reading')}>
+              <div className="ic" style={{ background: 'rgba(255,255,255,.09)' }}>
+                📖
+              </div>
+              <div className="m">
+                <b>Lecture partagée</b>
+                <span>Inchangé côté partenaire</span>
+              </div>
+              <div className="r" style={{ fontSize: 20, color: 'var(--text-3)' }}>
+                ›
+              </div>
+            </button>
+            <button type="button" className="ms" style={{ background: 'transparent', width: '100%', border: 0, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }} onClick={() => navigate('/shopping')}>
+              <div className="ic" style={{ background: 'rgba(255,255,255,.09)' }}>
+                🛒
+              </div>
+              <div className="m">
+                <b>Courses &amp; maison</b>
+                <span>Budget, liste, inventaire</span>
+              </div>
+              <div className="r" style={{ fontSize: 20, color: 'var(--text-3)' }}>
+                ›
+              </div>
+            </button>
+          </div>
+        </>
+      )}
+
+      <ConfigSheet open={sheetOpen} defaultStartWeight={resurrection.latestWeight?.weight ?? 0} onClose={() => setSheetOpen(false)} onSubmit={handleConfigSubmit} />
+      <WeighSheet open={weighOpen} currentWeight={currentWeight} onClose={() => setWeighOpen(false)} onSubmit={handleWeighSubmit} />
+      {toast && <div className="toast on">{toast}</div>}
     </section>
   );
 }

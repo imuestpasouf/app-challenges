@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { useAuth } from './app/useAuth';
 import { LoginScreen } from './features/auth/LoginScreen';
@@ -12,10 +13,25 @@ import { SettingsScreen } from './features/settings/SettingsScreen';
 import { TabBar } from './components/TabBar';
 import { Wallpaper } from './components/Wallpaper';
 import { useSpecularLight } from './lib/useSpecularLight';
+import { useIsResurrectionActive } from './features/resurrection/useResurrectionData';
+import { RESURRECTION_ACTIVATED_EVENT } from './lib/resurrectionEvent';
 
 function App() {
   const { session, loading } = useAuth();
   useSpecularLight();
+  const isResurrectionActive = useIsResurrectionActive(!!session);
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function onActivated() {
+      if (reduceMotion) return;
+      setFlash(true);
+      setTimeout(() => setFlash(false), 1200);
+    }
+    window.addEventListener(RESURRECTION_ACTIVATED_EVENT, onActivated);
+    return () => window.removeEventListener(RESURRECTION_ACTIVATED_EVENT, onActivated);
+  }, []);
 
   if (loading) {
     return (
@@ -36,8 +52,9 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
-      <Wallpaper />
+    <div className={`app-shell${isResurrectionActive ? ' res' : ''}`}>
+      <Wallpaper resurrectionActive={isResurrectionActive} />
+      {flash && <div className="res-flash go" />}
       <Routes>
         <Route path="/" element={<HomeScreen />} />
         <Route path="/sport" element={<SportScreen />} />

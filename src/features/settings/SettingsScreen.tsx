@@ -4,6 +4,7 @@ import { useAuth } from '../../app/useAuth';
 import { getOrCreateMyPrefs, updateMyPrefs } from '../../api/notificationPrefs';
 import { disablePush, enablePush, getPushSubscriptionEndpoint, isPushSupported } from '../../lib/push';
 import { Button } from '../../components/Button';
+import { useResurrectionData } from '../resurrection/useResurrectionData';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
 
@@ -25,6 +26,9 @@ export function SettingsScreen() {
 
   const prefsQuery = useQuery({ queryKey: ['notification-prefs'], queryFn: getOrCreateMyPrefs });
   const prefs = prefsQuery.data;
+
+  const resurrection = useResurrectionData();
+  const [confirmingStop, setConfirmingStop] = useState(false);
 
   const [subscribed, setSubscribed] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>(() =>
@@ -140,6 +144,55 @@ export function SettingsScreen() {
                 style={{ width: 100 }}
               />
             </div>
+          )}
+        </div>
+      )}
+
+      {resurrection.isActive && resurrection.mode && (
+        <div className="glass gcard" style={{ marginTop: 14 }}>
+          <p className="note" style={{ textAlign: 'left' }}>
+            Mode Résurrection actif depuis le {new Date(resurrection.mode.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}. L'arrêter
+            repasse ton app en thème clair ; tes pesées et jalons restent consultables.
+          </p>
+          {!confirmingStop ? (
+            <button
+              type="button"
+              onClick={() => setConfirmingStop(true)}
+              style={{
+                marginTop: 12,
+                width: '100%',
+                borderRadius: 18,
+                padding: 13,
+                fontWeight: 700,
+                border: '0.5px solid rgba(224,49,39,.4)',
+                background: 'rgba(224,49,39,.12)',
+                color: 'var(--red)',
+              }}
+            >
+              Arrêter le mode Résurrection
+            </button>
+          ) : (
+            <>
+              <p className="note" style={{ textAlign: 'left', color: 'var(--red)', marginTop: 8 }}>
+                Confirmer l'arrêt ? Ton app repassera en thème clair immédiatement.
+              </p>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => void resurrection.stopMode().then(() => setConfirmingStop(false))}
+                  style={{ flex: 1, borderRadius: 18, padding: 13, fontWeight: 700, border: 0, background: 'var(--red)', color: '#fff' }}
+                >
+                  Confirmer l'arrêt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingStop(false)}
+                  style={{ flex: 1, borderRadius: 18, padding: 13, fontWeight: 600, border: '0.5px solid rgba(255,255,255,.7)', background: 'rgba(255,255,255,.4)', color: 'var(--text)' }}
+                >
+                  Annuler
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}
