@@ -26,8 +26,14 @@ export function InventoryPane({ items, onAdjust, onAdd, onPushLow }: InventoryPa
   const [label, setLabel] = useState('');
   const [unit, setUnit] = useState('');
   const [minQty, setMinQty] = useState('1');
+  const [toast, setToast] = useState<string | null>(null);
 
   const low = items.filter((i) => stockStatus(i) !== 'ok');
+
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2600);
+  }
 
   function handleAdd() {
     const trimmed = label.trim();
@@ -38,6 +44,17 @@ export function InventoryPane({ items, onAdjust, onAdd, onPushLow }: InventoryPa
     setUnit('');
     setMinQty('1');
     setAddOpen(false);
+  }
+
+  async function handleCopyNames() {
+    if (items.length === 0) return;
+    const text = items.map((i) => i.label).join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(`${items.length} article${items.length > 1 ? 's' : ''} copié${items.length > 1 ? 's' : ''} 📋`);
+    } catch {
+      showToast('Impossible de copier — vérifie les autorisations du navigateur');
+    }
   }
 
   return (
@@ -59,7 +76,33 @@ export function InventoryPane({ items, onAdjust, onAdd, onPushLow }: InventoryPa
 
       <div className="lbl">
         <span>PROVISIONS</span>
-        <span>{items.length} articles</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+          {items.length} articles
+          <button
+            type="button"
+            onClick={() => void handleCopyNames()}
+            disabled={items.length === 0}
+            title="Copier les noms des articles"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              border: 'none',
+              background: 'rgba(255,255,255,.5)',
+              boxShadow: 'var(--rim)',
+              color: 'var(--brand)',
+              fontSize: 11,
+              fontWeight: 600,
+              padding: '4px 10px',
+              borderRadius: 99,
+              cursor: items.length === 0 ? 'default' : 'pointer',
+              opacity: items.length === 0 ? 0.5 : 1,
+              fontFamily: 'inherit',
+            }}
+          >
+            📋 Copier la liste
+          </button>
+        </span>
       </div>
 
       {!addOpen ? (
@@ -126,6 +169,8 @@ export function InventoryPane({ items, onAdjust, onAdd, onPushLow }: InventoryPa
           );
         })}
       </div>
+
+      {toast && <div className="toast on">{toast}</div>}
     </section>
   );
 }
